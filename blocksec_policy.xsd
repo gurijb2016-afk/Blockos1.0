@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="blocksec-policy">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="metadata" type="MetadataType"/>
+        <xs:element name="domains"  type="DomainsType"/>
+        <xs:element name="rules"    type="RulesType"/>
+        <xs:element name="transitions" type="TransitionsType" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="MetadataType">
+    <xs:sequence>
+      <xs:element name="name"    type="xs:string"/>
+      <xs:element name="version" type="xs:string"/>
+      <xs:element name="author"  type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DomainsType">
+    <xs:sequence>
+      <xs:element name="domain" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name"       type="xs:string"  use="required"/>
+          <xs:attribute name="privileged" type="xs:boolean" use="required"/>
+          <xs:attribute name="confined"   type="xs:boolean" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RulesType">
+    <xs:sequence>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="allow" type="RuleType"/>
+        <xs:element name="deny"  type="RuleType"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RuleType">
+    <xs:attribute name="source" type="xs:string" use="required"/>
+    <xs:attribute name="target" type="xs:string" use="required"/>
+    <xs:attribute name="class"  type="xs:string" use="required"/>
+    <xs:attribute name="perms"  type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="TransitionsType">
+    <xs:sequence>
+      <xs:element name="transition" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="source" type="xs:string" use="required"/>
+          <xs:attribute name="exec"   type="xs:string" use="required"/>
+          <xs:attribute name="target" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

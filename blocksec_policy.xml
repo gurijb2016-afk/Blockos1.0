@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blocksec-policy version="1.0">
+
+  <metadata>
+    <name>BlockOS Default Policy</name>
+    <version>1.0</version>
+    <author>BlockOS Team</author>
+  </metadata>
+
+  <domains>
+    <domain name="kernel_t"    privileged="true"  confined="false"/>
+    <domain name="init_t"      privileged="true"  confined="false"/>
+    <domain name="user_t"      privileged="false" confined="true"/>
+    <domain name="shell_t"     privileged="false" confined="true"/>
+    <domain name="gui_t"       privileged="false" confined="true"/>
+    <domain name="network_t"   privileged="false" confined="true"/>
+    <domain name="untrusted_t" privileged="false" confined="true"/>
+    <domain name="blockai_t"   privileged="false" confined="true"/>
+  </domains>
+
+  <rules>
+    <!-- Kernel mindenhez hozzáfér -->
+    <allow source="kernel_t" target="any_t" class="file"    perms="all"/>
+    <allow source="kernel_t" target="any_t" class="process" perms="all"/>
+
+    <!-- Init jogok -->
+    <allow source="init_t" target="system_file_t" class="file" perms="read exec"/>
+    <allow source="init_t" target="any_t"         class="process" perms="fork"/>
+
+    <!-- Felhasználói jogok -->
+    <allow source="user_t" target="user_home_t"   class="file" perms="read write create delete"/>
+    <deny  source="user_t" target="system_file_t" class="file" perms="write delete"/>
+    <deny  source="user_t" target="device_t"      class="device" perms="all"/>
+
+    <!-- Shell -->
+    <allow source="shell_t" target="user_home_t"   class="file" perms="read exec"/>
+    <allow source="shell_t" target="system_file_t" class="file" perms="read exec"/>
+    <deny  source="shell_t" target="system_file_t" class="file" perms="write"/>
+
+    <!-- GUI -->
+    <allow source="gui_t" target="any_t"       class="file"    perms="read"/>
+    <allow source="gui_t" target="user_home_t" class="file"    perms="write"/>
+    <allow source="gui_t" target="any_t"       class="process" perms="read"/>
+
+    <!-- Hálózat -->
+    <allow source="network_t" target="any_t" class="socket" perms="connect send recv bind"/>
+    <deny  source="network_t" target="system_file_t" class="file" perms="write"/>
+
+    <!-- AI domain - korlátozott -->
+    <allow source="blockai_t" target="user_home_t"   class="file"   perms="read write"/>
+    <allow source="blockai_t" target="any_t"         class="socket" perms="connect send recv"/>
+    <deny  source="blockai_t" target="system_file_t" class="file"   perms="all"/>
+    <deny  source="blockai_t" target="device_t"      class="device" perms="all"/>
+
+    <!-- Untrusted - minimális jogok -->
+    <allow source="untrusted_t" target="user_home_t" class="file" perms="read"/>
+    <deny  source="untrusted_t" target="any_t"       class="process" perms="fork kill"/>
+    <deny  source="untrusted_t" target="system_file_t" class="file" perms="all"/>
+  </rules>
+
+  <transitions>
+    <!-- Domain váltások -->
+    <transition source="init_t"   exec="/bin/blocksh"   target="shell_t"/>
+    <transition source="init_t"   exec="/bin/blockwm"   target="gui_t"/>
+    <transition source="shell_t"  exec="/bin/blockai"   target="blockai_t"/>
+    <transition source="user_t"   exec="/bin/blocksh"   target="shell_t"/>
+  </transitions>
+
+</blocksec-policy>
